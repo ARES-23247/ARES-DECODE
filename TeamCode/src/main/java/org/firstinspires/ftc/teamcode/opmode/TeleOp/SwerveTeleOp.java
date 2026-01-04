@@ -62,6 +62,9 @@ public class SwerveTeleOp extends CommandOpMode {
 
     private Limelight3A limelight;
     private IMU imu;
+    public static double xTarget = 1;
+    public static double yTarget = 1;
+    public static double headingTarget = 0;
     public void generatePath() {
         pathPoses = new ArrayList<Pose2d>();
 
@@ -105,6 +108,7 @@ public class SwerveTeleOp extends CommandOpMode {
         );
         limelight.start();
 //        intakeRight.setInverted(true);
+        pinpoint.resetPosAndIMU();
     }
 
     @Override
@@ -125,12 +129,14 @@ public class SwerveTeleOp extends CommandOpMode {
             double y = botpose.getPosition().y;
             double heading = botpose.getOrientation().getYaw();
             Pose2D pinpointPose = new Pose2D (DistanceUnit.MM, x, y, AngleUnit.DEGREES, heading);
-            pinpoint.resetPosAndIMU();
-            pinpoint.setPosition(pinpointPose);
+//            pinpoint.resetPosAndIMU();
+//            pinpoint.setPosition(pinpointPose);
         }
         telemetryData.addData("ta", llResult.getTa());
         telemetryData.addData("tx", llResult.getTx());
         telemetryData.addData("ty", llResult.getTy());
+        telemetryData.addData("pinpont x", pinpoint.getEncoderX());
+        telemetryData.addData("pinpoint y", pinpoint.getEncoderY());
 
         // Update any constants that are being updated by FTCDash
         for (CoaxialSwerveModule module : robot.drive.swerve.getModules()) {
@@ -138,20 +144,24 @@ public class SwerveTeleOp extends CommandOpMode {
         }
 
         while (gamepad1.a) {
-            robot.drive.setPose(pathPoses.get(0));
-            schedule(
-                    new InstantCommand(),
-                    new ConditionalCommand(
-                            new SequentialCommandGroup(
-                                new DriveTo(pathPoses.get(1)),
-                                new DriveTo(pathPoses.get(2))
-                            ),
-                            new RunCommand(
-                                    () -> schedule(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))))
-                            ),
-                            () -> FOLLOW_PREPROGRAMMED_PATHS
-                    )
-            );
+//            if (pathPoses == null)
+//                generatePath();
+//            robot.drive.setPose(pathPoses.get(0));
+//            schedule(
+//                    new InstantCommand(),
+//                    new ConditionalCommand(
+//                            new SequentialCommandGroup(
+//                                new DriveTo(pathPoses.get(1)),
+//                                new DriveTo(pathPoses.get(2))
+//                            ),
+//                            new RunCommand(
+//                                    () -> schedule(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))))
+//                            ),
+//                            () -> FOLLOW_PREPROGRAMMED_PATHS
+//                    )
+//            );
+            run(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))
+            ));
         }
 
         // Drive the robot
