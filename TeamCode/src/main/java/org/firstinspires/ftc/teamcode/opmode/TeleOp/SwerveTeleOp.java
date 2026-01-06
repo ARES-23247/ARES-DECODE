@@ -25,6 +25,10 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
+import com.seattlesolvers.solverslib.hardware.ServoEx;
+import com.seattlesolvers.solverslib.hardware.motors.CRServo;
+import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
+import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
@@ -51,9 +55,15 @@ public class SwerveTeleOp extends CommandOpMode {
     public GamepadEx operator;
     public ElapsedTime timer;
     private GoBildaPinpointDriver pinpoint;
-//    private MotorEx intakeLeft = new MotorEx(hardwareMap, "intake left", Motor.GoBILDA.NONE);
-//    private MotorEx intakeRight = new MotorEx(hardwareMap, "intake right", Motor.GoBILDA.NONE);
+//    private MotorEx intakeLeft = new MotorEx(hardwareMap, "intake left", Motor.GoBILDA.RPM_435);
+//    private MotorEx intakeRight = new MotorEx(hardwareMap, "intake right", Motor.GoBILDA.RPM_435);
 //    private MotorGroup intake = new MotorGroup(intakeLeft, intakeRight);
+//    private MotorEx shooterLeft = new MotorEx(hardwareMap, "shooter left", Motor.GoBILDA.BARE);
+//    private MotorEx shooterRight = new MotorEx(hardwareMap, "shooter right", Motor.GoBILDA.BARE);
+//    private MotorGroup shooter = new MotorGroup(shooterLeft, shooterRight);
+//    private CRServoEx hoodLeft = new CRServoEx(hardwareMap, "hood left");
+//    private CRServoEx hoodRight = new CRServoEx(hardwareMap, "hood right");
+//    private CRServoGroup hood = new CRServoGroup(hoodLeft, hoodRight);
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     private final Robot robot = Robot.getInstance();
@@ -108,6 +118,8 @@ public class SwerveTeleOp extends CommandOpMode {
         );
         limelight.start();
 //        intakeRight.setInverted(true);
+//        shooterRight.setInverted(true);
+//        hoodRight.setInverted(true);
         pinpoint.resetPosAndIMU();
     }
 
@@ -160,9 +172,30 @@ public class SwerveTeleOp extends CommandOpMode {
 //                            () -> FOLLOW_PREPROGRAMMED_PATHS
 //                    )
 //            );
-            run(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))
-            ));
-        }
+            new InstantCommand(
+                    () -> schedule(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))))
+            );
+        };
+
+//        if (gamepad1.left_trigger > 0.8){
+//            intake.set(-50);
+//        }
+//        else {
+//            intake.set(0);
+//        };
+
+//        if (gamepad1.right_trigger > 0.8){
+//            intake.set(-50);
+//            shooter.set(100);
+//        }
+//        else {
+//            intake.set(0);
+//            shooter.set(0);
+//        };
+
+//        while (gamepad1.b){
+//            intake.set(5);
+//        };
 
         // Drive the robot
         double minSpeed = 0.3; // As a fraction of the max speed of the robot
