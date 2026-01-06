@@ -14,6 +14,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.ConditionalCommand;
@@ -25,13 +26,13 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.geometry.Rotation2d;
-import com.seattlesolvers.solverslib.hardware.ServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServo;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoEx;
 import com.seattlesolvers.solverslib.hardware.motors.CRServoGroup;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
+import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -55,15 +56,13 @@ public class SwerveTeleOp extends CommandOpMode {
     public GamepadEx operator;
     public ElapsedTime timer;
     private GoBildaPinpointDriver pinpoint;
-//    private MotorEx intakeLeft = new MotorEx(hardwareMap, "intake left", Motor.GoBILDA.RPM_435);
-//    private MotorEx intakeRight = new MotorEx(hardwareMap, "intake right", Motor.GoBILDA.RPM_435);
-//    private MotorGroup intake = new MotorGroup(intakeLeft, intakeRight);
-//    private MotorEx shooterLeft = new MotorEx(hardwareMap, "shooter left", Motor.GoBILDA.BARE);
-//    private MotorEx shooterRight = new MotorEx(hardwareMap, "shooter right", Motor.GoBILDA.BARE);
-//    private MotorGroup shooter = new MotorGroup(shooterLeft, shooterRight);
-//    private CRServoEx hoodLeft = new CRServoEx(hardwareMap, "hood left");
-//    private CRServoEx hoodRight = new CRServoEx(hardwareMap, "hood right");
-//    private CRServoGroup hood = new CRServoGroup(hoodLeft, hoodRight);
+    MotorEx intakeLeft;
+    MotorEx intakeRight;
+    MotorGroup intake;
+    MotorEx shooterLeft;
+    MotorEx shooterRight;
+    MotorGroup shooter;
+    ServoEx hood;
 
     TelemetryData telemetryData = new TelemetryData(new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()));
     private final Robot robot = Robot.getInstance();
@@ -111,15 +110,22 @@ public class SwerveTeleOp extends CommandOpMode {
         driver = new GamepadEx(gamepad1);
         operator = new GamepadEx(gamepad2);
 
+        intakeLeft = new MotorEx(hardwareMap, "intake left", Motor.GoBILDA.RPM_435);
+        intakeRight = new MotorEx(hardwareMap, "intake right", Motor.GoBILDA.RPM_435);
+        intake = new MotorGroup(intakeLeft, intakeRight);
+        shooterLeft = new MotorEx(hardwareMap, "shooter left", Motor.GoBILDA.BARE);
+        shooterRight = new MotorEx(hardwareMap, "shooter right", Motor.GoBILDA.BARE);
+        shooter = new MotorGroup(shooterLeft, shooterRight);
+        hood = new ServoEx(hardwareMap, "hood");
+
         // Driver controls
         // Reset heading
         driver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new InstantCommand(() -> robot.drive.setPose(new Pose2d()))
         );
         limelight.start();
-//        intakeRight.setInverted(true);
-//        shooterRight.setInverted(true);
-//        hoodRight.setInverted(true);
+        intakeRight.setInverted(true);
+        shooterLeft.setInverted(true);
         pinpoint.resetPosAndIMU();
     }
 
@@ -177,25 +183,24 @@ public class SwerveTeleOp extends CommandOpMode {
             );
         };
 
-//        if (gamepad1.left_trigger > 0.8){
-//            intake.set(-50);
-//        }
-//        else {
-//            intake.set(0);
-//        };
+        if (gamepad1.left_bumper){
+            intake.set(-100);
+        }
+        else {
+            intake.set(0);
+        };
 
-//        if (gamepad1.right_trigger > 0.8){
-//            intake.set(-50);
-//            shooter.set(100);
-//        }
-//        else {
-//            intake.set(0);
-//            shooter.set(0);
-//        };
+        if (gamepad1.right_bumper){
+            shooter.set(100);
+        }
+        else {
+            intake.set(0);
+            shooter.set(0);
+        };
 
-//        while (gamepad1.b){
-//            intake.set(5);
-//        };
+        while (gamepad1.b){
+            intake.set(10);
+        };
 
         // Drive the robot
         double minSpeed = 0.3; // As a fraction of the max speed of the robot
