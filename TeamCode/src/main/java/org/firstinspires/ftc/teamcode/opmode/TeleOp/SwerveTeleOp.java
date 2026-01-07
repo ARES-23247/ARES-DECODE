@@ -74,9 +74,9 @@ public class SwerveTeleOp extends CommandOpMode {
 
     private Limelight3A limelight;
     private IMU imu;
-    public static double xTarget = 1;
-    public static double yTarget = 1;
-    public static double headingTarget = 0;
+    public static double xTarget = 200; // TODO need to work on this
+    public static double yTarget = 200; // TODO need to work on this
+    public static double headingTarget = 30; // TODO need to work on this
     public void generatePath() {
         pathPoses = new ArrayList<Pose2d>();
 
@@ -134,6 +134,28 @@ public class SwerveTeleOp extends CommandOpMode {
         shooter.setVeloCoefficients(20, 0, 0);
         shooter.setFeedforwardCoefficients(0, 0.7);
 //        intake.setPositionCoefficient(5);
+
+        // This enables DriveTo. Joystick is disable until DriveTo pose finishes
+        driver.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+                new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget)))
+        );
+
+        // This command runs joysticks ONLY when DriveTo is not running
+        // If you have both the DriveTo and joystick functionality in the run loop, they confuse each other
+        // and leads to staggering movement
+        robot.drive.setDefaultCommand(new RunCommand(() -> {
+            double minSpeed = 0.3;
+            double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+            robot.drive.swerve.updateWithTargetVelocity(
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                            driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                            -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+                            -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+                            robot.drive.getPose().getRotation()
+                    )
+            );
+        }, robot.drive));
     }
 
     @Override
@@ -168,7 +190,7 @@ public class SwerveTeleOp extends CommandOpMode {
             module.setSwervoPIDF(Constants.SWERVO_PIDF_COEFFICIENTS);
         }
 
-        while (gamepad1.a) {
+//        while (gamepad1.a) {
 //            if (pathPoses == null)
 //                generatePath();
 //            robot.drive.setPose(pathPoses.get(0));
@@ -185,10 +207,10 @@ public class SwerveTeleOp extends CommandOpMode {
 //                            () -> FOLLOW_PREPROGRAMMED_PATHS
 //                    )
 //            );
-            new InstantCommand(
-                    () -> schedule(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))))
-            );
-        };
+//            new InstantCommand(
+//                    () -> schedule(new DriveTo(new Pose2d(xTarget, yTarget, new Rotation2d(headingTarget))))
+//            );
+//        };
 
         if (gamepad1.left_bumper){
             intake.set(-1);
@@ -233,16 +255,16 @@ public class SwerveTeleOp extends CommandOpMode {
         telemetryData.addData("hood setpoint", hoodSetpoint);
 
         // Drive the robot
-        double minSpeed = 0.3; // As a fraction of the max speed of the robot
-        double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        robot.drive.swerve.updateWithTargetVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                        -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
-                        -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
-                        robot.drive.getPose().getRotation()
-                )
-        );
+//        double minSpeed = 0.3; // As a fraction of the max speed of the robot
+//        double speedMultiplier = minSpeed + (1 - minSpeed) * driver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+//        robot.drive.swerve.updateWithTargetVelocity(
+//                ChassisSpeeds.fromFieldRelativeSpeeds(
+//                        driver.getLeftY() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+//                        -driver.getLeftX() * Constants.MAX_DRIVE_VELOCITY * speedMultiplier,
+//                        -driver.getRightX() * Constants.MAX_ANGULAR_VELOCITY * speedMultiplier,
+//                        robot.drive.getPose().getRotation()
+//                )
+//        );
 
         telemetryData.addData("Loop Time", timer.milliseconds());
         timer.reset();

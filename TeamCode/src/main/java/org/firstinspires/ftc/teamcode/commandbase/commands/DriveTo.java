@@ -34,13 +34,13 @@ public class DriveTo extends CommandBase {
         if (maxPower != previousMaxPower) {
             robot.drive.swerve.setMaxSpeed(maxPower);
         }
-
-//        robot.drive.swerve.updateWithTargetVelocity(
-//                ChassisSpeeds.fromFieldRelativeSpeeds(
-//                        robot.drive.follower.calculate(robot.drive.getPose()),
-//                        robot.drive.getPose().getRotation()
-//                )
-//        );
+        // uncommented this to make the DriveTo work
+        robot.drive.swerve.updateWithTargetVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        robot.drive.follower.calculate(robot.drive.getPose()),
+                        robot.drive.getPose().getRotation()
+                )
+        );
     }
 
     @Override
