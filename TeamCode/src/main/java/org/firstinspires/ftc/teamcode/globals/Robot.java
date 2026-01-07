@@ -79,6 +79,9 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     public CRServoEx FLswervo;
     public CRServoEx BLswervo;
     public CRServoEx BRswervo;
+    public MotorEx shooterRight;
+    public MotorEx shooterLeft;
+    public MotorGroup shooter;
 
     public CRServoGroup turretServos;
     public AbsoluteAnalogEncoder turretEncoder;

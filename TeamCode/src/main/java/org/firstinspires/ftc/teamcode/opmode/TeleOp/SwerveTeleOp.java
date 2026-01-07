@@ -69,6 +69,9 @@ public class SwerveTeleOp extends CommandOpMode {
 
     public ArrayList<Pose2d> pathPoses;
 
+    private double hoodSetpoint = 0;
+    private boolean hoodControl = false;
+
     private Limelight3A limelight;
     private IMU imu;
     public static double xTarget = 1;
@@ -127,6 +130,10 @@ public class SwerveTeleOp extends CommandOpMode {
         intakeRight.setInverted(true);
         shooterLeft.setInverted(true);
         pinpoint.resetPosAndIMU();
+        shooter.setRunMode(Motor.RunMode.VelocityControl);
+        shooter.setVeloCoefficients(20, 0, 0);
+        shooter.setFeedforwardCoefficients(0, 0.7);
+//        intake.setPositionCoefficient(5);
     }
 
     @Override
@@ -184,23 +191,46 @@ public class SwerveTeleOp extends CommandOpMode {
         };
 
         if (gamepad1.left_bumper){
-            intake.set(-100);
-        }
-        else {
-            intake.set(0);
+            intake.set(-1);
+            shooter.set(-0.3);
         };
 
         if (gamepad1.right_bumper){
-            shooter.set(100);
-        }
-        else {
+            shooter.se;
+            if (shooter.getVelocity() > 500)
+            intake.set(-1);
+        };
+
+        if (gamepad1.dpad_down){
             intake.set(0);
             shooter.set(0);
         };
 
-        while (gamepad1.b){
+        if (gamepad1.b){
             intake.set(10);
-        };
+        } else if (!gamepad1.b && !gamepad1.left_bumper) {
+            intake.set(0);
+        }
+
+        if (gamepad1.y){
+            if (hoodControl == true){
+            hoodSetpoint = hoodSetpoint + 0.1;
+            hood.set(hoodSetpoint);
+            hoodControl = false;
+        }} else if (!gamepad1.y && !gamepad1.x) {
+            hoodControl = true;
+        }
+
+        if (gamepad1.x){
+            if (hoodControl == true){
+                hoodSetpoint = hoodSetpoint - 0.1;
+                hood.set(hoodSetpoint);
+                hoodControl = false;
+            }} else if (!gamepad1.x && !gamepad1.y) {
+            hoodControl = true;
+        }
+
+        telemetryData.addData("hood setpoint", hoodSetpoint);
 
         // Drive the robot
         double minSpeed = 0.3; // As a fraction of the max speed of the robot
